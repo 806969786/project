@@ -1,5 +1,6 @@
 package com.xmcc.service.impl;
 
+import com.xmcc.common.ProductEnums;
 import com.xmcc.common.ResultEnums;
 import com.xmcc.common.ResultResponse;
 import com.xmcc.dto.ProductCategoryDto;
@@ -8,11 +9,13 @@ import com.xmcc.entity.ProductInfo;
 import com.xmcc.repository.ProductInfoRepository;
 import com.xmcc.service.ProductCategoryService;
 import com.xmcc.service.ProductInfoService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +40,7 @@ public class ProductInfoServiceImpl implements ProductInfoService {
         //获得类目编号集合
         List<Integer> categoryTypeList = categorydtoList.stream().map(categorydto -> categorydto.getCategoryType()).collect(Collectors.toList());
         //查询商品列表  这里商品上下架可以用枚举 方便扩展
-        List<ProductInfo> productInfoList = productInfoRepository.findByProductStatusAndCategoryTypeIn(ResultEnums.PRODUCT_UP.getCode(), categoryTypeList);
+        List<ProductInfo> productInfoList = productInfoRepository.findByProductStatusAndCategoryTypeIn(ProductEnums.PRODUCT_UP.getCode(), categoryTypeList);
         //多线程遍历categorydtoList 取出每个商品类目编号对应的 商品列表 设置进入类目中
         List<ProductCategoryDto> finalResultList = categorydtoList.parallelStream().map(categorydto -> {
             //将productInfo 设置到foods中
@@ -50,5 +53,27 @@ public class ProductInfoServiceImpl implements ProductInfoService {
             return categorydto;
         }).collect(Collectors.toList());
         return ResultResponse.success(finalResultList);
+    }
+
+    @Override
+    public ResultResponse<ProductInfo> queryById(String productId) {
+        if (StringUtils.isBlank(productId)) {
+            return ResultResponse.fail(ProductEnums.PRODUCT_ERROR.getMsg());
+        }
+        Optional<ProductInfo> findById=productInfoRepository.findById(productId);//返回操作
+        if (!findById.isPresent()){ //如果不存在
+            return ResultResponse.fail(ProductEnums.NOT_EXITS.getMsg());
+        }
+        ProductInfo productInfo=findById.get();
+        //商品是否下架
+        if (productInfo.getProductStatus()==ProductEnums.PRODUCT_NOT_ENOUGH.getCode()){
+            return ResultResponse.fail(ProductEnums.PRODUCT_NOT_ENOUGH.getMsg());
+        }
+        return ResultResponse.success(productInfo);
+    }
+
+    @Override
+    public void updateProduct(ProductInfo productInfo) {
+        productInfoRepository.save(productInfo);
     }
 }
