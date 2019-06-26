@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class ResultResponse<T> {
 
     private int code;
+
     private String msg;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)//返回json时忽略为null的属性

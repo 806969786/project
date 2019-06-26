@@ -26,7 +26,7 @@ public class ProductInfoController {
      */
     @RequestMapping("/list")
     @ApiOperation(value = "查询商品列表") //生成接口文档注解:描述操作信息
-    public ResultResponse list(){
+    private ResultResponse list(){
         return productInfoService.queryList();
     }
 }

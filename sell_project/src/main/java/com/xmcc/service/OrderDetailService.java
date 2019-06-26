@@ -1,6 +1,7 @@
 package com.xmcc.service;
 
 import com.xmcc.entity.OrderDetail;
+import com.xmcc.entity.OrderMaster;
 
 import java.util.List;
 
@@ -14,4 +15,11 @@ public interface OrderDetailService {
      * @param orderDetailList
      */
     public void batchInsert(List<OrderDetail> orderDetailList);
+
+    /**
+     * 根据orderId查询订单项详情
+     * @param orderId
+     * @return
+     */
+    public List<OrderDetail> findByOrderId(String orderId);
 }
